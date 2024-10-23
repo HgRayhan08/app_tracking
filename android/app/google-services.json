@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "569727212341",
+    "project_id": "database-tracking-4b83f",
+    "storage_bucket": "database-tracking-4b83f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:569727212341:android:cfb9e890d82d635ea98a7c",
+        "android_client_info": {
+          "package_name": "com.example.app_tracking"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDXIOAdHiPS6u8x7cdDWYb8GKfgVVCuTd8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:569727212341:android:fa56822c8ad37e96a98a7c",
+        "android_client_info": {
+          "package_name": "com.hugo.tracklocation"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDXIOAdHiPS6u8x7cdDWYb8GKfgVVCuTd8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
