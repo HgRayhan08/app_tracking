@@ -51,7 +51,7 @@ class Tracking extends _$Tracking {
     );
   }
 
-  void onMyLocationButtonPress() async {
+  Future<void> onMyLocationButtonPress() async {
     final Location location = Location();
     late bool serviceEnabled;
     late PermissionStatus permissionGranted;

@@ -39,7 +39,7 @@ class UserData extends _$UserData {
     }
   }
 
-  Future<void> registrasi({
+  Future<bool> registrasi({
     required String email,
     required String password,
   }) async {
@@ -49,10 +49,13 @@ class UserData extends _$UserData {
     switch (result) {
       case Success(value: final user):
         state = AsyncData(user);
+        return true;
       case Failed(:final message):
         state = AsyncError(FlutterError(message), StackTrace.current);
         state = const AsyncData(null);
+        return false;
     }
+    return false;
   }
 
   Future<void> logout() async {

@@ -9,6 +9,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:uuid/uuid.dart';
 import 'package:cron/cron.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class TrackingPage extends ConsumerStatefulWidget {
   const TrackingPage({super.key});
@@ -31,18 +32,69 @@ class _TrackingPageState extends ConsumerState<TrackingPage> {
   Position? _currentPosition;
 
   @override
-  void initState() {
-    super.initState();
-    _startLocationUpdates(); // Memulai pengiriman data lokasi setiap 2 menit
-  }
-
-  @override
   void dispose() {
     _cron.close(); // Menghentikan cron ketika halaman ditutup
     super.dispose();
   }
 
+  // Future<void> _startLocationUpdates() async {
+  //   // Permintaan akses lokasi
+  //   LocationPermission permission = await Geolocator.requestPermission();
+  //   if (permission == LocationPermission.denied ||
+  //       permission == LocationPermission.deniedForever) {
+  //     return; // Berhenti jika permission ditolak
+  //   }
+
+  //   // Mulai cron job untuk update lokasi setiap 2 menit
+  //   _cron.schedule(Schedule.parse('*/2 * * * *'), () async {
+  //     try {
+  //       _currentPosition = await Geolocator.getCurrentPosition(
+  //           desiredAccuracy: LocationAccuracy.high);
+  //       if (isUpdate == true) {
+  //         ref.watch(trackingProvider.notifier).updateTracking(
+  //               id: newId.toString(),
+  //               location: LatLng(
+  //                   _currentPosition!.latitude, _currentPosition!.longitude),
+  //             );
+  //       }
+  //       setState(() {}); // Update UI jika perlu
+  //     } catch (e) {
+  //       print("Error getting location: $e");
+  //     }
+  //   });
+  // }
+
   Future<void> _startLocationUpdates() async {
+    // Cek koneksi internet
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult == ConnectivityResult.none) {
+      return showDialog<void>(
+        context: context,
+        barrierDismissible: false, // user must tap button!
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Pemberitahuan'),
+            content: const SingleChildScrollView(
+              child: ListBody(
+                children: <Widget>[
+                  Text('Jaringan Internet tidak Tesedia'),
+                  Text('Sekian Pesan ini'),
+                ],
+              ),
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('Oke'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      ); // Berhenti jika tidak ada koneksi internet
+    }
+
     // Permintaan akses lokasi
     LocationPermission permission = await Geolocator.requestPermission();
     if (permission == LocationPermission.denied ||
@@ -53,17 +105,49 @@ class _TrackingPageState extends ConsumerState<TrackingPage> {
     // Mulai cron job untuk update lokasi setiap 2 menit
     _cron.schedule(Schedule.parse('*/2 * * * *'), () async {
       try {
+        // Cek koneksi internet lagi sebelum mengupdate lokasi
+        connectivityResult = await (Connectivity().checkConnectivity());
+        if (connectivityResult == ConnectivityResult.none) {
+          return showDialog<void>(
+            context: context,
+            barrierDismissible: false, // user must tap button!
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('Pemberitahuan'),
+                content: const SingleChildScrollView(
+                  child: ListBody(
+                    children: <Widget>[
+                      Text(
+                          'Jaringan Internet terputus Tidak dapat melakukan Tracking.'),
+                      Text('Sekian Pesan ini'),
+                    ],
+                  ),
+                ),
+                actions: <Widget>[
+                  TextButton(
+                    child: const Text('Oke'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              );
+            },
+          ); // Berhenti jika tidak ada koneksi internet
+          // Berhenti jika tidak ada koneksi internet
+        }
+
+        // Mendapatkan posisi saat ini
         _currentPosition = await Geolocator.getCurrentPosition(
             desiredAccuracy: LocationAccuracy.high);
 
-        if (isUpdate == true && _currentPosition != null) {
+        if (isUpdate == true && connectivityResult != ConnectivityResult.none) {
           ref.watch(trackingProvider.notifier).updateTracking(
                 id: newId.toString(),
                 location: LatLng(
                     _currentPosition!.latitude, _currentPosition!.longitude),
               );
         }
-
         setState(() {}); // Update UI jika perlu
       } catch (e) {
         print("Error getting location: $e");
@@ -81,7 +165,7 @@ class _TrackingPageState extends ConsumerState<TrackingPage> {
         actions: [
           IconButton(
             onPressed: () {
-              ref.read(routerProvider).goNamed("history");
+              ref.read(routerProvider).pushNamed("history");
             },
             icon: const Icon(Icons.history),
           ),
@@ -212,70 +296,80 @@ class _TrackingPageState extends ConsumerState<TrackingPage> {
                               )),
                         ],
                       ),
-                      isStart == false
-                          ? ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                minimumSize: Size(width * 0.2, height * 0.01),
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 12),
-                                backgroundColor: Colors.green[600],
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                              onPressed: () async {
-                                if (lokasi == null) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text("Mohon Masukkan Tujuan"),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          isStart == false
+                              ? ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    minimumSize:
+                                        Size(width * 0.2, height * 0.01),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 12),
+                                    backgroundColor: Colors.green[600],
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
                                     ),
-                                  );
-                                } else {
-                                  print("start");
-                                  newId = uuid.v1();
-                                  await ref
-                                      .read(trackingProvider.notifier)
-                                      .createTracking(
-                                        location: LatLng(dataLocation.latitude,
-                                            dataLocation.longitude),
-                                        address: lokasi!,
-                                        destination: destinationLocation!,
-                                        id: newId!,
+                                  ),
+                                  onPressed: () async {
+                                    if (lokasi == null) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content:
+                                              Text("Mohon Masukkan Tujuan"),
+                                        ),
                                       );
-                                  isStart = true;
-                                  isUpdate = true;
-                                  print(isUpdate);
-                                  setState(() {});
-                                  print("coba");
-                                }
-                              },
-                              child: const Text(
-                                "Start",
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            )
-                          : ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                minimumSize: Size(width * 0.2, height * 0.01),
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 12),
-                                backgroundColor: Colors.red,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
+                                    } else {
+                                      print("start");
+                                      newId = uuid.v1();
+                                      await ref
+                                          .read(trackingProvider.notifier)
+                                          .createTracking(
+                                            location: LatLng(
+                                                dataLocation.latitude,
+                                                dataLocation.longitude),
+                                            address: lokasi!,
+                                            destination: destinationLocation!,
+                                            id: newId!,
+                                          );
+                                      isStart = true;
+                                      isUpdate = true;
+                                      _startLocationUpdates();
+                                      setState(() {});
+                                    }
+                                  },
+                                  child: const Text(
+                                    "Start",
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                )
+                              : ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    minimumSize:
+                                        Size(width * 0.2, height * 0.01),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 12),
+                                    backgroundColor: Colors.red,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    destinationLocation = null;
+                                    lokasi = null;
+                                    isStart = false;
+                                    isUpdate = false;
+                                    setState(() {});
+                                  },
+                                  child: const Text(
+                                    "Stop",
+                                    style: TextStyle(color: Colors.white),
+                                  ),
                                 ),
-                              ),
-                              onPressed: () {
-                                destinationLocation = null;
-                                lokasi = null;
-                                isStart = false;
-                                isUpdate = false;
-                                setState(() {});
-                              },
-                              child: const Text(
-                                "Stop",
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ),
+                        ],
+                      ),
                     ],
                   ),
                 ),

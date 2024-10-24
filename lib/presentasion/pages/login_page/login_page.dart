@@ -13,6 +13,7 @@ class LoginPage extends ConsumerStatefulWidget {
 class _LoginPageState extends ConsumerState<LoginPage> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  bool _obscureText = false;
 
   @override
   Widget build(BuildContext context) {
@@ -28,8 +29,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           }
         } else if (next is AsyncError) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(next.error.toString()),
+            const SnackBar(
+              content: Text("Akun Tidak Ditemukan"),
             ),
           );
         }
@@ -70,7 +71,19 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
+              suffixIcon: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _obscureText = !_obscureText;
+                    });
+                  },
+                  child: Icon(
+                    _obscureText == false
+                        ? Icons.visibility_off
+                        : Icons.visibility,
+                  )),
             ),
+            obscureText: !_obscureText,
             controller: passwordController,
           ),
           SizedBox(height: height * 0.05),

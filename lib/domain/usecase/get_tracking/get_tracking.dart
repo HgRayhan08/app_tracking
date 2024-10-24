@@ -10,6 +10,7 @@ class GetTracking implements UseCase<Result<List<TrackingData>>, void> {
   @override
   Future<Result<List<TrackingData>>> call(void params) async {
     var result = await realtimeDatabase.getAllTracking();
+    print(result.resultValue!.length);
     return switch (result) {
       Success(value: final data) => Result.success(data),
       Failed(:final message) => Result.failed(message),

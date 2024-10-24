@@ -27,8 +27,8 @@ class _MainPageState extends ConsumerState<MainPage> {
       label: 'Home',
     ),
     BottomNavigationBarItem(
-      icon: Icon(Icons.message_sharp),
-      label: 'Laporan',
+      icon: Icon(Icons.location_on),
+      label: 'Tracking',
     ),
     BottomNavigationBarItem(
       icon: Icon(Icons.person),

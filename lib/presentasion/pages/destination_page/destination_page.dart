@@ -14,8 +14,6 @@ class DestinationPage extends ConsumerStatefulWidget {
 }
 
 class _DestinationPageState extends ConsumerState<DestinationPage> {
-  late GoogleMapController mapController;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,6 +26,7 @@ class _DestinationPageState extends ConsumerState<DestinationPage> {
           },
           icon: const Icon(Icons.arrow_back),
         ),
+        title: const Text("Destination Tracking"),
       ),
       body: FutureBuilder(
           future:
@@ -62,27 +61,32 @@ class _DestinationPageState extends ConsumerState<DestinationPage> {
                               place;
                         });
 
-                        ref.read(trackingProvider.notifier).defineMarker(
-                            LatLng(data.latitude, data.longitude),
-                            street,
-                            address);
+                        setState(() {
+                          ref.read(trackingProvider.notifier).defineMarker(
+                              LatLng(data.latitude, data.longitude),
+                              street,
+                              address);
+                        });
 
                         setState(() {
-                          // ref.read(trackingProvider.notifier).mapController =
-                          controller;
+                          ref.read(trackingProvider.notifier).mapController =
+                              controller;
                         });
                       },
-                      onLongPress: (LatLng latLng) => ref
-                          .read(trackingProvider.notifier)
-                          .onLongPressGoogleMap(latLng),
+                      onLongPress: (LatLng latLng) {
+                        ref
+                            .read(trackingProvider.notifier)
+                            .onLongPressGoogleMap(latLng);
+                        setState(() {});
+                      },
                     ),
                     Positioned(
                       top: 16,
                       right: 16,
                       child: FloatingActionButton(
                           child: const Icon(Icons.my_location),
-                          onPressed: () {
-                            ref
+                          onPressed: () async {
+                            await ref
                                 .read(trackingProvider.notifier)
                                 .onMyLocationButtonPress();
                             setState(() {});

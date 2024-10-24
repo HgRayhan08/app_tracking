@@ -59,29 +59,37 @@ class FirebaseRealtimeDatabase implements RealtimeDatabase {
   @override
   Future<Result<List<TrackingData>>> getAllTracking() async {
     var result = await dbRef.get();
+
     if (result.children.isNotEmpty) {
+      print(result.children.length);
       return Result.success(
-        result.children
-            .map((e) => TrackingData(
-                location: LocationTracking(
-                  latitude: double.parse(e.child("latitude").value.toString()),
-                  longitude:
-                      double.parse(e.child("longitude").value.toString()),
-                ),
-                // LatLng(double.parse(e.child("address").toString()),
-                // double.parse(e.child("address").toString())),
-                address: e.child("address").toString(),
-                destination: LocationTracking(
-                  latitude: double.parse(e.child("latitude").value.toString()),
-                  longitude:
-                      double.parse(e.child("longitude").value.toString()),
-                ),
-                updateTime: e.child("updateTime").toString(),
-                timestamp: e.child("timestamp").toString()))
-            .toList(),
+        result.children.map((e) {
+          // Pastikan data yang diambil dari child tidak null, tambahkan pengecekan
+          var latitude = e.child("latitude").value?.toString() ?? "0.0";
+          var longitude = e.child("longitude").value?.toString() ?? "0.0";
+          var address =
+              e.child("address").value?.toString() ?? "Unknown address";
+          var updateTime = e.child("updateTime").value?.toString() ?? "";
+          var timestamp = e.child("timestamp").value?.toString() ?? "";
+
+          return TrackingData(
+            location: LocationTracking(
+              latitude: double.parse(latitude),
+              longitude: double.parse(longitude),
+            ),
+            address: address,
+            destination: LocationTracking(
+              latitude: double.parse(
+                  latitude), // Pastikan ini sesuai dengan data yang benar
+              longitude: double.parse(longitude),
+            ),
+            updateTime: updateTime,
+            timestamp: timestamp,
+          );
+        }).toList(),
       );
     } else {
-      return const Result.failed("failed get data");
+      return const Result.failed("Failed to get data");
     }
   }
 }

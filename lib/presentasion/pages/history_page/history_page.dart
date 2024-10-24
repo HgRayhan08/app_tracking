@@ -1,3 +1,4 @@
+import 'package:app_tracking/presentasion/providers/router/router_provider.dart';
 import 'package:app_tracking/presentasion/providers/tracking/tracking_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +9,15 @@ class HistoryPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        title: Text("History Tracking"),
+        leading: IconButton(
+          onPressed: () {
+            ref.read(routerProvider).pop();
+          },
+          icon: const Icon(Icons.arrow_back),
+        ),
+      ),
       body: FutureBuilder(
           future: ref.watch(trackingProvider.notifier).getAllTracking(),
           builder: (context, snapshot) {

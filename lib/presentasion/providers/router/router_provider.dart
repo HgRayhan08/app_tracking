@@ -2,6 +2,7 @@ import 'package:app_tracking/presentasion/pages/destination_page/destination_pag
 import 'package:app_tracking/presentasion/pages/history_page/history_page.dart';
 import 'package:app_tracking/presentasion/pages/login_page/login_page.dart';
 import 'package:app_tracking/presentasion/pages/main_page/main_page.dart';
+import 'package:app_tracking/presentasion/pages/qr_page/qr_page.dart';
 import 'package:app_tracking/presentasion/pages/registrasi_page/registrasi_page.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -39,7 +40,7 @@ Raw<GoRouter> router(RouterRef ref) => GoRouter(
         GoRoute(
           path: "/scan",
           name: "scan",
-          builder: (context, state) => const HistoryPage(),
+          builder: (context, state) => const QrPage(),
         ),
       ],
       initialLocation: "/login",

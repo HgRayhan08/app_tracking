@@ -15,7 +15,37 @@ class ProfilePage extends ConsumerWidget {
         actions: [
           IconButton(
             onPressed: () {
-              ref.read(userDataProvider.notifier).logout();
+              showDialog<void>(
+                context: context,
+                barrierDismissible: false, // user must tap button!
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text("Confirm Logout"),
+                    content: const SingleChildScrollView(
+                      child: ListBody(
+                        children: <Widget>[
+                          Text('Logout'),
+                          Text('Apakah anda yakin untuk keluar?'),
+                        ],
+                      ),
+                    ),
+                    actions: <Widget>[
+                      TextButton(
+                        child: const Text('Cancel'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      TextButton(
+                        child: const Text('ok'),
+                        onPressed: () {
+                          ref.read(userDataProvider.notifier).logout();
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
             },
             icon: const Icon(Icons.exit_to_app),
           ),
